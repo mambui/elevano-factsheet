@@ -32,9 +32,9 @@ def get_data_from_supabase():
     df['nav'] = pd.to_numeric(df['nav'], errors='coerce')
     df['btc_price'] = pd.to_numeric(df['btc_price'], errors='coerce')
     
-    # Set Dec 31 nav to 1000 as base
-    if '2025-12-31' in df.index:
-        df.loc['2025-12-31', 'nav'] = 1000.0
+    # Set Dec 31 nav to 999.86 (same as Jan 1 base) so pct_change gives Jan 1 return
+    if pd.Timestamp('2025-12-31') in df.index:
+        df.loc[pd.Timestamp('2025-12-31'), 'nav'] = 999.86
     
     nav_df = df['nav'][df['nav'] > 0]
     btc_df = df['btc_price'].dropna()
@@ -68,30 +68,12 @@ def generate_factsheet():
     output_path = '/opt/render/project/src/factsheet.html'
     qs.reports.html(
         nav_returns,
-        benchmark=None,
+        benchmark="BTC-USD",
         output=output_path,
-        title='Elevano Capital — Performance Report',
+        title='Elevano Capital — Performance Report · Jan 1, 2026',
         download_filename='elevano_factsheet.html',
+        benchmark_title='Bitcoin (BTC)'
     )
-    
-    # Inject disclaimer note into HTML
-    disclaimer = """
-    <div style="background:#f9f5f0;border-left:3px solid #c07a8a;padding:12px 16px;margin:20px 0;font-size:12px;color:#555;font-family:Arial,sans-serif;">
-        <strong>Note on methodology:</strong> QuantStats was built for traditional finance and annualises metrics using 252 business days. 
-        Elevano Capital operates in crypto markets (24/7, 365 days/year), which is why some figures such as Sharpe Ratio and annualised returns 
-        may differ slightly from those displayed on <a href="https://elevanocapital.com" style="color:#c07a8a;">elevanocapital.com</a>, 
-        which uses 365-day annualisation.
-    </div>
-    """
-    
-    with open(output_path, 'r', encoding='utf-8') as f:
-        html = f.read()
-    
-    # Insert after <body> tag
-    html = html.replace('<body onload="save()">', f'<body onload="save()">{disclaimer}')
-    
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(html)
     
     # Inject disclaimer note into HTML
     disclaimer = """
