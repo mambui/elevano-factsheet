@@ -42,20 +42,19 @@ def get_data_from_supabase():
     nav_returns = nav_df.pct_change().dropna()
     btc_returns = btc_df.pct_change().dropna()
     
+    # Localize BEFORE filtering and aligning
+    nav_returns.index = pd.DatetimeIndex(nav_returns.index).tz_localize('UTC')
+    btc_returns.index = pd.DatetimeIndex(btc_returns.index).tz_localize('UTC')
+    
     # Keep only 2026 dates
-    nav_returns = nav_returns[nav_returns.index >= '2026-01-01']
-    btc_returns = btc_returns[btc_returns.index >= '2026-01-01']
+    cutoff = pd.Timestamp('2026-01-01', tz='UTC')
+    nav_returns = nav_returns[nav_returns.index >= cutoff]
+    btc_returns = btc_returns[btc_returns.index >= cutoff]
     
     # Align dates
     common_dates = nav_returns.index.intersection(btc_returns.index)
     nav_returns = nav_returns[common_dates]
     btc_returns = btc_returns[common_dates]
-    
-    # Localize both to UTC — reset first to avoid double-localize
-    if nav_returns.index.tz is None:
-        nav_returns.index = pd.DatetimeIndex(nav_returns.index).tz_localize('UTC')
-    if btc_returns.index.tz is None:
-        btc_returns.index = pd.DatetimeIndex(btc_returns.index).tz_localize('UTC')
     
     print(f"Got {len(nav_returns)} days — from {nav_returns.index[0].date()} to {nav_returns.index[-1].date()}")
     return nav_returns, btc_returns
