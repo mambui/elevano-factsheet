@@ -81,7 +81,13 @@ def generate_factsheet():
         download_filename='elevano_factsheet.html',
     )
     
-    # Inject disclaimer note into HTML
+    with open(output_path, 'r', encoding='utf-8') as f:
+        html = f.read()
+
+    # Hide auto-generated date range from h1
+    html = html.replace('</style>', 'h1 dt { display: none !important; }</style>')
+
+    # Add disclaimer
     disclaimer = """
     <div style="background:#f9f5f0;border-left:3px solid #c07a8a;padding:12px 16px;margin:20px 0;font-size:12px;color:#555;font-family:Arial,sans-serif;">
         <strong>Note on methodology:</strong> QuantStats was designed for traditional finance and annualises metrics using 252 business days. 
@@ -90,12 +96,8 @@ def generate_factsheet():
         which uses 365-day annualisation to reflect the continuous nature of crypto trading.
     </div>
     """
-    
-    with open(output_path, 'r', encoding='utf-8') as f:
-        html = f.read()
-    
     html = html.replace('<body onload="save()">', f'<body onload="save()">{disclaimer}')
-    
+
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
     
