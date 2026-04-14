@@ -2,7 +2,6 @@ quantstats==0.0.62
 pandas==2.1.4
 numpy==1.26.4
 requests==2.31.0
-supabase==1.2.0
 matplotlib==3.8.2
 seaborn==0.13.1
 yfinance==0.2.18
