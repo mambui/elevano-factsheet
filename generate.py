@@ -21,9 +21,13 @@ def supabase_get(table, query=''):
     headers = {
         'apikey': SUPABASE_KEY,
         'Authorization': f'Bearer {SUPABASE_KEY}',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
     }
+    print(f"Calling: {url}")
     response = requests.get(url, headers=headers)
+    print(f"Status: {response.status_code}")
+    print(f"Response: {response.text[:200]}")
     return response.json()
 
 def supabase_upload(bucket, filename, content, content_type='text/html'):
@@ -89,4 +93,3 @@ def main():
 
 if __name__ == '__main__':
     main()
- 
