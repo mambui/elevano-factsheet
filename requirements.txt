@@ -7,3 +7,4 @@ matplotlib==3.8.2
 seaborn==0.13.1
 yfinance==0.2.18
 websockets==12.0
+ipython==8.12.3
