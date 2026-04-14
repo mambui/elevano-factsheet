@@ -72,13 +72,13 @@ def generate_factsheet():
     btc_returns_qs = btc_returns.copy()
     btc_returns_qs.index = btc_returns_qs.index.tz_localize(None)
 
+    end_date = nav_returns_qs.index[-1].strftime('%b %d, %Y')
     qs.reports.html(
         nav_returns_qs,
-        benchmark=btc_returns_qs,
+        benchmark=None,
         output=output_path,
-        title='Elevano Capital — Performance Report · Jan 1, 2026',
+        title=f'Elevano Capital — Performance Report · Jan 1, 2026 - {end_date}',
         download_filename='elevano_factsheet.html',
-        benchmark_title='Bitcoin (BTC)'
     )
     
     # Inject disclaimer note into HTML
