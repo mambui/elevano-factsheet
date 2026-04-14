@@ -5,3 +5,5 @@ requests==2.31.0
 supabase==2.3.0
 matplotlib==3.8.2
 seaborn==0.13.1
+yfinance==0.2.18
+websockets==11.0.3
