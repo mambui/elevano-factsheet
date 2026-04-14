@@ -66,9 +66,15 @@ def generate_factsheet():
         return None
     
     output_path = '/opt/render/project/src/factsheet.html'
+    # Strip timezone for quantstats compatibility
+    nav_returns_qs = nav_returns.copy()
+    nav_returns_qs.index = nav_returns_qs.index.tz_localize(None)
+    btc_returns_qs = btc_returns.copy()
+    btc_returns_qs.index = btc_returns_qs.index.tz_localize(None)
+
     qs.reports.html(
-        nav_returns,
-        benchmark="BTC-USD",
+        nav_returns_qs,
+        benchmark=btc_returns_qs,
         output=output_path,
         title='Elevano Capital — Performance Report · Jan 1, 2026',
         download_filename='elevano_factsheet.html',
