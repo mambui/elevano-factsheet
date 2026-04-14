@@ -19,7 +19,6 @@ def supabase_get(table, query=''):
 
 def get_data_from_supabase():
     print("Fetching data from Supabase...")
-    # Include Dec 31 2025 as base so Jan 1 return is calculated
     data = supabase_get('nav_history', 'select=date,nav,btc_price&date=gte.2025-12-31&order=date.asc')
     if not data or isinstance(data, dict):
         print(f"Error: {data}")
@@ -31,26 +30,28 @@ def get_data_from_supabase():
     df['nav'] = pd.to_numeric(df['nav'], errors='coerce')
     df['btc_price'] = pd.to_numeric(df['btc_price'], errors='coerce')
     
-    # For NAV: use Dec 31 as base (nav=1000 on Dec 31 for pct_change to work)
-    nav_df = df['nav'].copy()
-    nav_df['2025-12-31'] = 1000.0  # set Dec 31 as base
-    nav_df = nav_df[nav_df > 0]
+    # Set Dec 31 nav to 1000 as base
+    if '2025-12-31' in df.index:
+        df.loc['2025-12-31', 'nav'] = 1000.0
     
-    btc_df = df[df['btc_price'].notna()]['btc_price']
+    nav_df = df['nav'][df['nav'] > 0]
+    btc_df = df['btc_price'].dropna()
     
     nav_returns = nav_df.pct_change().dropna()
     btc_returns = btc_df.pct_change().dropna()
     
-    # Only keep 2026 dates
+    # Keep only 2026 dates
     nav_returns = nav_returns[nav_returns.index >= '2026-01-01']
     btc_returns = btc_returns[btc_returns.index >= '2026-01-01']
     
+    # Align dates
     common_dates = nav_returns.index.intersection(btc_returns.index)
     nav_returns = nav_returns[common_dates]
     btc_returns = btc_returns[common_dates]
     
-    nav_returns.index = nav_returns.index.tz_localize('UTC')
-    btc_returns.index = btc_returns.index.tz_localize('UTC')
+    # Localize both to UTC
+    nav_returns.index = pd.DatetimeIndex(nav_returns.index).tz_localize('UTC')
+    btc_returns.index = pd.DatetimeIndex(btc_returns.index).tz_localize('UTC')
     
     print(f"Got {len(nav_returns)} days — from {nav_returns.index[0].date()} to {nav_returns.index[-1].date()}")
     return nav_returns, btc_returns
@@ -85,6 +86,24 @@ def generate_factsheet():
         html = f.read()
     
     # Insert after <body> tag
+    html = html.replace('<body onload="save()">', f'<body onload="save()">{disclaimer}')
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+    
+    # Inject disclaimer note into HTML
+    disclaimer = """
+    <div style="background:#f9f5f0;border-left:3px solid #c07a8a;padding:12px 16px;margin:20px 0;font-size:12px;color:#555;font-family:Arial,sans-serif;">
+        <strong>Note on methodology:</strong> QuantStats was designed for traditional finance and annualises metrics using 252 business days. 
+        Elevano Capital operates in crypto markets (24/7, 365 days/year). As a result, figures such as Sharpe Ratio and annualised returns 
+        may differ slightly from those displayed on <a href="https://elevanocapital.com" style="color:#c07a8a;">elevanocapital.com</a>, 
+        which uses 365-day annualisation to reflect the continuous nature of crypto trading.
+    </div>
+    """
+    
+    with open(output_path, 'r', encoding='utf-8') as f:
+        html = f.read()
+    
     html = html.replace('<body onload="save()">', f'<body onload="save()">{disclaimer}')
     
     with open(output_path, 'w', encoding='utf-8') as f:
