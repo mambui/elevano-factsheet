@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend — must be before any other matplotlib import
+
 from flask import Flask, Response
 import os
 import threading

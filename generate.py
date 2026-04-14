@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import os
 import requests
 import pandas as pd
@@ -49,9 +51,11 @@ def get_data_from_supabase():
     nav_returns = nav_returns[common_dates]
     btc_returns = btc_returns[common_dates]
     
-    # Localize both to UTC
-    nav_returns.index = pd.DatetimeIndex(nav_returns.index).tz_localize('UTC')
-    btc_returns.index = pd.DatetimeIndex(btc_returns.index).tz_localize('UTC')
+    # Localize both to UTC — reset first to avoid double-localize
+    if nav_returns.index.tz is None:
+        nav_returns.index = pd.DatetimeIndex(nav_returns.index).tz_localize('UTC')
+    if btc_returns.index.tz is None:
+        btc_returns.index = pd.DatetimeIndex(btc_returns.index).tz_localize('UTC')
     
     print(f"Got {len(nav_returns)} days — from {nav_returns.index[0].date()} to {nav_returns.index[-1].date()}")
     return nav_returns, btc_returns
