@@ -68,11 +68,10 @@ def generate_factsheet():
     output_path = '/opt/render/project/src/factsheet.html'
     qs.reports.html(
         nav_returns,
-        benchmark=btc_returns,
+        benchmark=None,
         output=output_path,
         title='Elevano Capital — Performance Report',
         download_filename='elevano_factsheet.html',
-        benchmark_title='Bitcoin (BTC)'
     )
     
     # Inject disclaimer note into HTML
