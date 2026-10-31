@@ -65,7 +65,8 @@ def generate_factsheet():
         print("Not enough data")
         return None
     
-    output_path = '/opt/render/project/src/factsheet.html'
+    output_path = os.environ.get('FACTSHEET_OUTPUT', '/opt/render/project/src/factsheet.html')
+    os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
     # Strip timezone for quantstats compatibility
     nav_returns_qs = nav_returns.copy()
     nav_returns_qs.index = nav_returns_qs.index.tz_localize(None)
